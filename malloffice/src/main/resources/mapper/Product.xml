@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.product.dao.ProductDao">
+
+
+	<resultMap type = "com.office.vo.product.ProductInfoVO" id = "productMap" >
+		<result column = "PRODUCT_CODE" property = "productCode"/>
+		<result column = "CATEGORY_CODE" property = "categoryCode"/>
+		<result column = "PRODUCT_NAME" property = "ProductName"/>
+		<result column = "PRICE" property = "price"/>
+		<result column = "QTA" property = "qta"/>
+		<result column = "REG_DT" property = "regDate"/>
+		<result column = "PRODUCT_ST" property = "productSt"/>
+		<result column = "ORIGINAL_PRICE" property = "originalPrice"/>
+		<result column = "CONNECTION" property = "connection"/>
+		<result column = "THUMBNAIL" property = "thumbnail"/>
+		<result column = "PRODUCT_DETAIL" property = "productDetail"/>
+		<result column = "UPPER_CATEGORY_NAME" property = "upperCategoryName"/>
+		<result column = "CATEGORY_NAME" property = "categoryName"/>
+		<result column = "ORDER_QTA" property = "orderQta"/>
+
+	</resultMap>
+	
+	
+	
+	<select id = "selectProductPageCnt" resultType = "integer">
+		SELECT COUNT(*)
+		FROM TB_PRODUCT_INFO 
+	</select>
+	
+	<select id = "selectProductInfoList" resultMap = "productMap">
+		SELECT *
+		FROM(
+		SELECT
+			A.PRODUCT_CODE,
+			A.CATEGORY_CODE,
+			A.PRODUCT_NAME,
+			A.PRICE,
+			A.QTA,
+			TO_CHAR(A.REG_DT,'YYYY-MM-DD') AS REG_DT,
+			A.PRODUCT_ST,
+			A.ORIGINAL_PRICE,
+			A.CONNECTION,
+			A.THUMBNAIL,
+			A.PRODUCT_DETAIL,
+			ROWNUM AS RN,
+			( SELECT CATEGORY_NAME FROM TB_CATEGORY_INFO WHERE CATEGORY_CODE=SUBSTR(A.CATEGORY_CODE,0,2))
+            ||' <![CDATA[ > ]]>  '
+            ||( SELECT CATEGORY_NAME FROM TB_CATEGORY_INFO WHERE CATEGORY_CODE=SUBSTR(A.CATEGORY_CODE,0,4))
+            ||' <![CDATA[ > ]]>  '
+            || B.CATEGORY_NAME CATEGORY_NAME
+		FROM TB_PRODUCT_INFO A, TB_CATEGORY_INFO B
+		WHERE A.CATEGORY_CODE = B.CATEGORY_CODE
+		<if test="productName!=null and productName!='' ">
+		AND A.PRODUCT_NAME LIKE '%'||#{productName}||'%' 
+		</if>
+		<if test="productSt!=null and productSt!='' ">
+		AND A.PRODUCT_ST = #{productSt} 
+		</if>
+		<if test="connection!=null and connection!='' ">
+		AND A.CONNECTION = #{connection} 
+		</if>
+		<if test="decategory!=null and decategory!='' ">
+		AND A.CATEGORY_CODE LIKE #{decategory}||'%'
+		</if>
+		<if test="jocategory!=null and jocategory!='' ">
+		AND A.CATEGORY_CODE LIKE #{jocategory}||'%'
+		</if>
+		<if test="socategory!=null and socategory!='' ">
+		AND A.CATEGORY_CODE LIKE #{socategory}||'%'
+		</if>
+		ORDER BY A.PRODUCT_CODE ASC
+		)
+		WHERE RN<![CDATA[>]]>(#{currentPage}-1)*#{countPerPage}
+		  AND RN<![CDATA[<=]]>#{currentPage}*#{countPerPage}
+
+	</select>
+	
+	<select id = "selectProductInfo" resultMap = "productMap">
+		SELECT
+			A.PRODUCT_CODE,
+			A.PRODUCT_NAME,
+			A.PRICE,
+			A.QTA,
+			A.CATEGORY_CODE,
+			TO_CHAR(A.REG_DT,'YYYY-MM-DD') AS REG_DT,
+			A.PRODUCT_ST,
+			A.ORIGINAL_PRICE,
+			A.CONNECTION,
+			A.THUMBNAIL,
+			A.PRODUCT_DETAIL
+		FROM TB_PRODUCT_INFO A
+		WHERE A.PRODUCT_CODE = #{productCode}
+	</select>
+	
+	<select id="selectCategory" resultMap="com.office.product.dao.CategoryDao.categoryMap">
+		SELECT 
+		A.CATEGORY_CODE,
+		A.CATEGORY_NAME,
+		A.CATEGORY_LEVEL,
+		A.UPPER_CATEGORY_CODE
+		FROM TB_CATEGORY_INFO A
+		
+	</select>
+	
+	<update id = 'updateProduct'>
+	UPDATE TB_PRODUCT_INFO SET
+	PRODUCT_NAME = #{productName},
+	PRICE = #{price},
+	QTA = #{qta},
+	PRODUCT_ST = #{productSt},
+	ORIGINAL_PRICE = #{originalPrice},
+	CONNECTION = #{connection},
+	REG_DT = SYSDATE,
+	PRODUCT_DETAIL = #{productDetail},
+	THUMBNAIL = #{thumbnail}
+	WHERE PRODUCT_CODE = #{productCode}
+	</update>
+	
+	<insert id="insertProduct">
+   		INSERT INTO TB_PRODUCT_INFO
+    		(PRODUCT_CODE, CATEGORY_CODE, PRODUCT_NAME, PRICE, QTA, PRODUCT_ST, ORIGINAL_PRICE, CONNECTION, REG_DT, PRODUCT_DETAIL)
+    	VALUES (#{productCode}, #{categoryCode}, #{productName}, #{price}, #{qta}, #{productSt}, #{originalPrice}, #{connection}, SYSDATE, #{productDetail})
+	</insert>
+	
+	<select id="getCategory" resultMap="com.office.product.dao.CategoryDao.categoryMap">
+		SELECT
+			A.CATEGORY_LEVEL,
+			A.CATEGORY_CODE,
+			TO_CHAR(A.CT_REG_DT,'YYYY-MM-DD') AS CT_REG_DT,
+			A.CATEGORY_NAME,
+			A.DELETE_YN,
+			A.UPPER_CATEGORY_CODE
+		FROM TB_CATEGORY_INFO A
+		
+	</select>
+
+	
+</mapper>

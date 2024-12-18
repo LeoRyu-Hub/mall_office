@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.product.dao.CategoryDao">
+
+	<resultMap type = "com.office.vo.product.CategoryInfoVO" id = "categoryMap" >
+		<result column = "CATEGORY_LEVEL" 		property = "categoryLevel"/>
+		<result column = "CATEGORY_CODE" 		property = "categoryCode"/>
+		<result column = "CATEGORY_NAME" 		property = "categoryName"/>
+		<result column = "CT_REG_DT" 			property = "ctRegDt"/>
+		<result column = "DELETE_YN" 			property = "deleteYN"/>
+		<result column = "UPPER_CATEGORY_CODE" 	property = "upperCategoryCode"/>
+	</resultMap>
+
+	<select id = "selectCategoryInfo" resultMap = "categoryMap">
+		SELECT
+			A.CATEGORY_LEVEL,
+			A.CATEGORY_CODE,
+			TO_CHAR(A.CT_REG_DT,'YYYY-MM-DD') AS CT_REG_DT,
+			A.CATEGORY_NAME,
+			A.DELETE_YN,
+			A.UPPER_CATEGORY_CODE
+		FROM TB_CATEGORY_INFO A
+		WHERE CATEGORY_LEVEL = #{categoryLevel}
+		<if test="upperCategoryCode!=null and upperCategoryCode!='' ">
+		AND UPPER_CATEGORY_CODE = #{upperCategoryCode}
+		</if>
+	</select>
+	
+	<insert id="saveCategory">
+		INSERT INTO TB_CATEGORY_INFO
+		(UPPER_CATEGORY_CODE, CATEGORY_LEVEL, CATEGORY_CODE, CATEGORY_NAME
+		)VALUES( #{upperCategoryCode}, #{categoryLevel}, #{categoryCode}, #{categoryName}
+		)
+	</insert>
+	
+	
+	<select id="selectMaxCategoryCode" resultType="String">
+		SELECT 
+		   REPLACE(NVL(#{upperCategoryCode},'')||TO_CHAR(SUBSTR(MAX(CATEGORY_CODE),(#{categoryLevel}*2-1),2)+1,'00'),' ','')
+		 FROM TB_CATEGORY_INFO
+		 WHERE 1=1
+		 <if test="upperCategoryCode!=null and upperCategoryCode!='' ">
+		 AND UPPER_CATEGORY_CODE=#{upperCategoryCode}
+		 </if>
+		 <if test="upperCategoryCode==null or upperCategoryCode=='' ">
+		 AND UPPER_CATEGORY_CODE IS NULL
+		 </if>
+	</select>
+
+
+	
+
+</mapper>

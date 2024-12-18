@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.schedule.Dao.DailyOrderDao">
+
+	<resultMap type="com.office.vo.order.orderInfoVO" id="orderMap">
+		<result column="ORDER_NO" property="orderNo" />
+		<result column="SELL_PRICE" property="orderPrice" />
+		<result column="SELL_CNT" property="orderQta" />
+	</resultMap>
+
+	<select id="selectOrder" resultMap = "orderMap">
+		SELECT MAX(PR) SELL_PRICE, MAX(QA) SELL_CNT
+			FROM (
+				SELECT SUM(PAYMENT_AMOUNT) PR , 0 QA
+				FROM TB_ORDER_INFO
+				WHERE TRUNC(ORDER_DT) = TRUNC(SYSDATE) - 1
+				UNION ALL
+				SELECT 0 PR, SUM(A.ORDER_QTA) QA
+				FROM TB_ORDER_PRODUCT A
+				WHERE ORDER_NO IN (SELECT ORDER_NO FROM TB_ORDER_INFO WHERE TRUNC(ORDER_DT) = TRUNC(SYSDATE) - 1)
+			)
+	</select>
+	
+	<insert id="insertOrder" >
+	INSERT INTO TB_DAILY_ORDER 
+		(ORDER_DT, SELL_CNT, SELL_PRICE, REG_DT)
+		VALUES(TRUNC(SYSDATE) - 1, #{orderQta}, #{orderPrice}, SYSDATE)
+	</insert>
+
+</mapper>

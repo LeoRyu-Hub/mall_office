@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.user.dao.UserDao">
+
+	<resultMap type = "com.office.vo.user.UserInfoVO" id = "userMap" >
+		<result column = "user_id" property = "userId"/>
+		<result column = "user_name" property = "userName"/>
+		<result column = "email" property = "email"/>
+		<result column = "phone" property = "phone"/>
+		<result column = "JOIN_DT" property = "joinDate"/>
+		<result column = "withdraw_yn" property = "withdrawYN"/>
+		<result column = "withdraw_dt" property = "withdrawDate"/>
+		<result column = "reason" property = "reason"/>
+		<result column = "addr" property = "addr"/>
+	</resultMap>
+	
+	<resultMap type = "com.office.vo.order.orderInfoVO" id = "orderMap" >
+		<result column = "ORDER_NO" 			property = "orderNo"/>
+		<result column = "USER_ID" 				property = "userId"/>
+		<result column = "ORDER_NAME" 			property = "orderName"/>
+		<result column = "ORDER_PHONE" 			property = "orderPhone"/>
+		<result column = "RECEIVE_NAME" 		property = "receiveName"/>
+		<result column = "RECEIVE_PHONE" 		property = "receivePhone"/>
+		<result column = "ORDER_ADDR" 			property = "orderAddr"/>
+		<result column = "PAYMENT_METHOD" 		property = "paymentMethod"/>
+		<result column = "PAYMENT_AMOUNT" 		property = "paymentAmount"/>
+		<result column = "ORDER_DT" 			property = "orderDt"/>
+		<result column = "ORDER_ST" 			property = "orderSt"/>
+		<result column = "REQUEST" 				property = "request"/>
+		<result column = "PRODUCT_NAME" 		property = "productName"/>
+		<result column = "ORDER_QTA" 			property = "orderQta"/>
+		<result column = "ORDER_PRICE" 			property = "orderPrice"/>
+	</resultMap>
+	
+	<select id = "selectUserInfoCount" resultType = "integer">
+		SELECT COUNT(*)
+		FROM TB_USER_INFO
+	</select>
+	
+	<select id = "selectUserInfoList" resultMap = "userMap">
+		SELECT *
+		FROM (
+		SELECT
+			B.USER_ID,
+			B.USER_NAME,
+			B.EMAIL,
+			B.PHONE,
+			TO_CHAR(B.JOIN_DT,'YYYY-MM-DD') AS JOIN_DT,
+			B.WITHDRAW_YN,
+			B.WITHDRAW_DT,
+			ROWNUM AS RN
+		FROM TB_USER_INFO B
+		)
+		WHERE RN<![CDATA[>]]>(#{currentPage}-1)*#{countPerPage}
+		  AND RN<![CDATA[<=]]>#{currentPage}*#{countPerPage}
+	</select>
+	 
+	
+	<select id = "selectUserInfo" resultMap = "userMap">
+		SELECT
+			A.USER_ID,
+			A.USER_NAME,
+			A.PHONE,
+			A.EMAIL,
+			TO_CHAR(A.JOIN_DT,'YYYY-MM-DD') AS JOIN_DT,
+			A.WITHDRAW_YN,
+			A.WITHDRAW_DT,
+			A.ADDR
+		FROM TB_USER_INFO A
+		WHERE A.USER_ID = #{userId}
+	</select>
+	
+	<select id = "selectOrderList" resultMap = "orderMap">
+		SELECT 
+    		A.ORDER_NO,
+    		C.PRODUCT_NAME,
+    		B.ORDER_QTA,
+    		B.ORDER_QTA*B.SELLINGPRICE AS ORDER_PRICE,
+    		A.RECEIVE_NAME,
+    		A.ORDER_ADDR,
+    		A.ORDER_ST 
+		FROM TB_ORDER_INFO A, TB_ORDER_PRODUCT B, TB_PRODUCT_INFO C
+		WHERE A.ORDER_NO = B.ORDER_NO
+		AND B.PRODUCT_CODE = C.PRODUCT_CODE
+		AND A.USER_ID = #{userId}
+	</select>
+	
+	
+	
+	
+	
+
+</mapper>

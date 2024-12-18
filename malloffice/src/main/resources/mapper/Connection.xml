@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.connection.dao.connectionDao">
+
+	<resultMap type = "com.office.vo.connection.connectionInfoVO" id = "connectionMap" >
+		<result column = "CONNECTION_CODE" 		property = "connectionCode"/>
+		<result column = "CONNECTION_NAME" 		property = "connectionName"/>
+		<result column = "CEO_NAME" 			property = "ceoName"/>
+		<result column = "CONNECTION_NUMBER" 	property = "connectionNumber"/>
+		<result column = "CHARGE_NAME" 			property = "chargeName"/>
+		<result column = "CHARGE_NUMBER" 		property = "chargeNumber"/>
+		<result column = "CHARGE_EMAIL" 		property = "chargeEmail"/>
+		<result column = "CONNECTION_ST" 		property = "connectionSt"/>
+		<result column = "REG_DT"	 			property = "regDt"/>
+		<result column = "CN_ORDERDT" 			property = "cnOrderDt"/>
+		<result column = "CN_ORDERNO" 			property = "cnOrderNo"/>
+		<result column = "PRODUCT_CODE"	 		property = "productCode"/>
+		<result column = "PRODUCT_NAME" 		property = "productName"/>
+		<result column = "CN_ORDERQTA" 			property = "cnOrderQta"/>
+		<result column = "CN_ORDERPRICE"	 	property = "cnOrderPrice"/>
+		<result column = "CN_ORDERST" 			property = "cnorderSt"/>
+		<result column = "RECEIVE_DT" 			property = "receiveDt"/>
+	</resultMap>
+	
+	<select id = "selectConnectiontList" resultMap = "connectionMap">
+		SELECT
+			A.CONNECTION_CODE,
+			A.CONNECTION_NAME,
+			A.CEO_NAME,
+			A.CONNECTION_NUMBER,
+			A.CHARGE_NAME,
+			A.CHARGE_NUMBER,
+			A.CHARGE_EMAIL,
+			A.CONNECTION_ST,
+			TO_CHAR(A.REG_DT,'YYYY-MM-DD') AS REG_DT
+		FROM TB_CONNECTION_MANAGEMENT A
+		WHERE 1=1
+		<if test="connectionSt!=null and connectionSt!=''">
+		AND A.CONNECTION_ST = #{connectionSt} 
+		</if>
+		<if test="connectionName!=null and connectionName!='' ">
+		AND A.CONNECTION_NAME LIKE '%'||#{connectionName}||'%' 
+		</if>
+	</select>
+	
+	<select id = "selectConnectiontInfo" resultMap = "connectionMap">
+		SELECT
+			A.CONNECTION_CODE,
+			A.CONNECTION_NAME,
+			A.CEO_NAME,
+			A.CONNECTION_NUMBER,
+			A.CHARGE_NAME,
+			A.CHARGE_NUMBER,
+			A.CHARGE_EMAIL,
+			A.CONNECTION_ST
+		FROM TB_CONNECTION_MANAGEMENT A
+		WHERE A.CONNECTION_CODE = #{connectionCode}
+	</select>
+	
+	<update id = "updateConnection">
+	UPDATE TB_CONNECTION_MANAGEMENT SET
+		CONNECTION_NAME = #{connectionName},
+		CEO_NAME = #{ceoName},
+		CONNECTION_NUMBER = #{connectionNumber},
+		CHARGE_NAME = #{chargeName},
+		CHARGE_NUMBER = #{chargeNumber},
+		CHARGE_EMAIL = #{chargeEmail},
+		CONNECTION_ST = #{connectionSt},
+		REG_DT = SYSDATE
+		WHERE CONNECTION_CODE = #{connectionCode}
+	</update>
+	
+	<insert id = "saveConnection">
+	INSERT INTO TB_CONNECTION_MANAGEMENT
+    		(CONNECTION_CODE, CONNECTION_NAME, CEO_NAME, CONNECTION_NUMBER, CHARGE_NAME, CHARGE_NUMBER, CHARGE_EMAIL, CONNECTION_ST, REG_DT)
+    	VALUES (#{connectionCode}, #{connectionName}, #{ceoName}, #{connectionNumber}, #{chargeName}, #{chargeNumber}, #{chargeEmail}, #{connectionSt}, SYSDATE)
+	</insert>
+	
+
+	
+
+</mapper>

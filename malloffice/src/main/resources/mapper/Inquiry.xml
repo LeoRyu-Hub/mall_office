@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.user.dao.InquiryDao">
+
+	<resultMap type = "com.office.vo.user.UserInquiryVO" id = "inquryMap" >
+		<result column = "USER_ID" property = "userId"/>
+		<result column = "INQUIRY_SQ" property = "inquirySq"/>
+		<result column = "ANSWER_DT" property = "answerDate"/>
+		<result column = "ANSWER_YN" property = "anwserYN"/>
+		<result column = "INQUIRY_DT" property = "inquiryDate"/>
+		<result column = "TITLE" property = "title"/>
+		<result column = "CONTENT" property = "content"/>
+		<result column = "TYPE" property = "type"/>
+		<result column = "USER_NAME" property = "userName"/>
+		<result column = "ATTACHMENT_1" property = "attachment1"/>
+		<result column = "ANSWER" property = "answer"/>
+	</resultMap>
+	
+	<select id = "selectInquryList" resultMap = "inquryMap">
+		SELECT
+			A.USER_ID,
+			A.INQUIRY_SQ,
+			TO_CHAR(A.ANSWER_DT,'YYYY-MM-DD') AS ANSWER_DT,
+			A.ANSWER_YN,
+			TO_CHAR(A.INQUIRY_DT,'YYYY-MM-DD') AS INQUIRY_DT,
+			A.TITLE,
+			A.CONTENT,
+			A.TYPE,
+			B.USER_NAME
+		FROM TB_USER_INQUIRY A, TB_USER_INFO B
+		WHERE A.USER_ID = B.USER_ID
+	</select>
+	
+	<select id = "selectInquiry" resultMap = "inquryMap">
+		SELECT
+			A.TITLE,
+			A.TYPE,
+			A.USER_ID,
+			B.USER_NAME,
+			TO_CHAR(A.INQUIRY_DT,'YYYY-MM-DD') AS INQUIRY_DT,
+			A.ATTACHMENT_1,
+			A.CONTENT,
+			A.ANSWER
+		FROM TB_USER_INQUIRY A
+		JOIN TB_USER_INFO B ON A.USER_ID = B.USER_ID
+		WHERE A.USER_ID = #{userId}
+		  AND A.INQUIRY_SQ = #{inquirySq}
+	</select>
+	
+	<update id = 'updateInquiry'>
+	UPDATE TB_USER_INQUIRY SET
+	ANSWER = #{answer}
+	WHERE USER_ID = #{userId}
+ 	  AND INQUIRY_SQ = #{inquirySq} 
+	
+	</update>
+
+
+</mapper>

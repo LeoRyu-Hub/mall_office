@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.adjustment.dao.adjustmentDao">
+
+	<resultMap type = "com.office.vo.adjustment.adjustmentInfoVO" id = "adjustmentMap" >
+		<result column = "ADJUSTMENT_DT" 		property = "adjustmentDt"/>
+		<result column = "ORDERPRICE" 			property = "orderPrice"/>
+		<result column = "SELLING_QTA" 			property = "sellingQta"/>
+	</resultMap>
+
+	<select id = "selectAdjustmentList" resultMap = "adjustmentMap">
+		SELECT
+			A.ORDERPRICE,
+			A.SELLING_QTA,
+			TO_CHAR(A.ADJUSTMENT_DT,'YYYY-MM-DD') AS ADJUSTMENT_DT
+		FROM TB_DAILYADJUSTMENT A
+		ORDER BY ADJUSTMENT_DT DESC
+	</select>
+
+
+</mapper>

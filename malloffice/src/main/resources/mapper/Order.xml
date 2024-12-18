@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.order.dao.orderDao">
+
+	<resultMap type = "com.office.vo.order.orderInfoVO" id = "orderMap" >
+		<result column = "ORDER_NO" 			property = "orderNo"/>
+		<result column = "USER_ID" 				property = "userId"/>
+		<result column = "ORDER_NAME" 			property = "orderName"/>
+		<result column = "ORDER_PHONE" 			property = "orderPhone"/>
+		<result column = "RECEIVE_NAME" 		property = "receiveName"/>
+		<result column = "RECEIVE_PHONE" 		property = "receivePhone"/>
+		<result column = "ORDER_ADDR" 			property = "orderAddr"/>
+		<result column = "PAYMENT_METHOD" 		property = "paymentMethod"/>
+		<result column = "PAYMENT_AMOUNT" 		property = "paymentAmount"/>
+		<result column = "ORDER_DT" 			property = "orderDt"/>
+		<result column = "ORDER_ST" 			property = "orderSt"/>
+		<result column = "REQUEST" 				property = "request"/>
+		<result column = "PRODUCT_NAME" 		property = "productName"/>
+	</resultMap>
+
+	<select id = 'selectOrderList' resultMap = "orderMap">
+	 SELECT
+	    A.ORDER_NO,
+	    A.USER_ID,
+	    A.ORDER_NAME,
+	    A.ORDER_PHONE,
+	    A.RECEIVE_NAME,
+	    A.RECEIVE_PHONE,
+	    A.ORDER_ADDR,
+    	A.PAYMENT_AMOUNT,
+    	A.PAYMENT_METHOD,
+    	TO_CHAR(A.ORDER_DT,'YYYY-MM-DD') AS ORDER_DT,
+    	A.ORDER_ST,
+    	A.REQUEST,
+   		(
+      	SELECT 
+	        CASE WHEN B.PRODUCT_CNT>1 THEN C.PRODUCT_NAME || ' 외 ' || (B.PRODUCT_CNT-1) || '건'
+             	ELSE C.PRODUCT_NAME 
+              	END 
+      	FROM 
+      	(SELECT 
+          	ORDER_NO, MAX(PRODUCT_CODE) PRODUCT_CODE, COUNT(*) PRODUCT_CNT
+       	FROM TB_ORDER_PRODUCT 
+       	GROUP BY ORDER_NO
+       	) B, TB_PRODUCT_INFO C
+       	WHERE B.PRODUCT_CODE = C. PRODUCT_CODE
+         	AND B.ORDER_NO = A.ORDER_NO
+      	) PRODUCT_NAME
+  	FROM TB_ORDER_INFO A
+	ORDER BY A.ORDER_NO ASC
+	</select>
+	
+	<update id = 'updateOrderSt'>
+	UPDATE TB_ORDER_INFO SET
+	ORDER_ST = #{newSt}
+	WHERE ORDER_NO = #{orderNo}
+	</update>
+	
+	<select id = 'selectOrderInfo' resultMap = "orderMap">
+	SELECT
+	    A.ORDER_NO,
+	    A.USER_ID,
+	    A.ORDER_NAME,
+	    A.ORDER_PHONE,
+	    A.RECEIVE_NAME,
+	    A.RECEIVE_PHONE,
+	    A.ORDER_ADDR,
+    	A.PAYMENT_AMOUNT,
+    	A.PAYMENT_METHOD,
+    	TO_CHAR(A.ORDER_DT,'YYYY-MM-DD') AS ORDER_DT,
+    	A.ORDER_ST,
+    	A.REQUEST,
+    	(
+      	SELECT 
+	        CASE WHEN B.PRODUCT_CNT>1 THEN C.PRODUCT_NAME || ' 외 ' || (B.PRODUCT_CNT-1) || '건'
+             	ELSE C.PRODUCT_NAME 
+              	END 
+      	FROM 
+      	(SELECT 
+          	ORDER_NO, MAX(PRODUCT_CODE) PRODUCT_CODE, COUNT(*) PRODUCT_CNT
+       	FROM TB_ORDER_PRODUCT 
+       	GROUP BY ORDER_NO
+       	) B, TB_PRODUCT_INFO C
+       	WHERE B.PRODUCT_CODE = C. PRODUCT_CODE
+         	AND B.ORDER_NO = A.ORDER_NO
+      	) PRODUCT_NAME
+      	FROM TB_ORDER_INFO A
+    	WHERE ORDER_NO = #{orderNo}
+
+	</select>
+	
+	<select id = 'selectProduct' resultMap = "com.office.product.dao.ProductDao.productMap">
+	
+		SELECT 
+    	(SELECT CATEGORY_NAME 
+     	FROM TB_CATEGORY_INFO 
+     	WHERE CATEGORY_CODE = SUBSTR(A.CATEGORY_CODE, 0, 2)) || ' <![CDATA[ > ]]>  ' ||
+    	(SELECT CATEGORY_NAME 
+     	FROM TB_CATEGORY_INFO 
+     	WHERE CATEGORY_CODE = SUBSTR(A.CATEGORY_CODE, 0, 4)) || ' <![CDATA[ > ]]>  ' ||
+    	(SELECT CATEGORY_NAME 
+     	FROM TB_CATEGORY_INFO 
+     	WHERE CATEGORY_CODE = A.CATEGORY_CODE) CATEGORY_NAME,
+    	B.PRODUCT_CODE,
+    	A.PRODUCT_NAME,
+    	A.PRICE,
+    	B.ORDER_QTA,
+    	A.QTA
+	FROM 
+	    TB_PRODUCT_INFO A,
+    	TB_ORDER_PRODUCT B
+	WHERE 
+    	B.ORDER_NO = #{orderNo} 
+    	AND A.PRODUCT_CODE = B.PRODUCT_CODE
+	
+	</select>
+
+
+</mapper>

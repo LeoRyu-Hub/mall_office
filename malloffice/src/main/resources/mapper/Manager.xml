@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.manager.dao.managerDao">
+
+	<resultMap type = "com.office.vo.manager.managerInfoVO" id = "managerMap" >
+		<result column = "MANAGER_ID" 		property = "managerId"/>
+		<result column = "EMAIL" 			property = "email"/>
+		<result column = "NAME" 			property = "name"/>
+		<result column = "PHONE" 			property = "phone"/>
+		<result column = "REG_DT" 			property = "regDt"/>
+		<result column = "QUIT_YN" 			property = "quitYn"/>
+		<result column = "PASSWORD" 		property = "password"/>
+	</resultMap>
+	
+	
+	<select id = "selectManagertList" resultMap = 'managerMap'>
+		SELECT
+			A.MANAGER_ID,
+			A.EMAIL,
+			A.NAME,
+			A.PHONE,
+			TO_CHAR(A.REG_DT,'YYYY-MM-DD') AS REG_DT,
+			A.QUIT_YN,
+			A.PASSWORD
+		FROM TB_MANAGE_SYSTEM A
+	</select>
+	
+	<select id = "selectManagerInfo" resultMap = 'managerMap'>
+		SELECT
+			A.MANAGER_ID,
+			A.EMAIL,
+			A.NAME,
+			A.PHONE,
+			TO_CHAR(A.REG_DT,'YYYY-MM-DD') AS REG_DT,
+			A.QUIT_YN,
+			A.PASSWORD
+		FROM TB_MANAGE_SYSTEM A
+		WHERE A.MANAGER_ID = #{managerId}
+	</select>
+	
+	<insert id='insertManagerInfo'>
+		INSERT INTO TB_MANAGE_SYSTEM(
+		MANAGER_ID, EMAIL, NAME, PHONE, REG_DT, QUIT_YN, PASSWORD
+		)VALUES(
+		#{managerId},#{email},#{name}, #{phone}, sysdate, #{quitYn}, #{password}
+		)
+	</insert>
+	
+	<select id='selectManager'>
+		SELECT
+			A.MANAGER_ID,
+			A.EMAIL,
+			A.NAME,
+			A.PHONE,
+			TO_CHAR(A.REG_DT,'YYYY-MM-DD') AS REG_DT,
+			A.QUIT_YN,
+			A.PASSWORD
+		FROM TB_MANAGE_SYSTEM A
+		WHERE MANAGER_ID = #{managerId}
+	</select>
+	
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.office.connection.dao.connectionDao">
+
+	<resultMap type = "com.office.vo.connection.connectionItemInfoVO" id = "connectionitemMap" >
+		<result column = "CONNECTION_CODE" 		property = "connectionCode"/>
+		<result column = "CONNECTION_NAME" 		property = "connectionName"/>
+		<result column = "CN_ORDERNO" 			property = "cnOrderNo"/>
+		<result column = "CN_ORDERST" 			property = "cnOrderSt"/>
+		<result column = "RECEIVE_DT" 			property = "receiveDt"/>
+		<result column = "PRODUCT_CODE" 		property = "productCode"/>
+		<result column = "CN_ORDERQTA" 			property = "cnOrderQta"/>
+		<result column = "CN_ORDERPRICE" 		property = "cnOrderPrice"/>
+		<result column = "PRODUCT_NAME"			property = "productName"/>
+		<result column = "CN_ORDERDT" 			property = "cnOrderDt"/>
+	</resultMap>
+	
+	
+	<select id = "selectConnectiontItemList" resultMap = "connectionitemMap">
+		SELECT 
+    		A.CONNECTION_CODE,
+    		A.CONNECTION_NAME,
+    		A.CN_ORDERNO,
+		    TO_CHAR(B.CN_ORDERDT,'YYYY-MM-DD') AS CN_ORDERDT,
+    		B.PRODUCT_CODE,
+    		B.PRODUCT_NAME,
+    		B.CN_ORDERQTA,
+    		B.CN_ORDERPRICE,
+    		A.CN_ORDERST,
+    		TO_CHAR(A.RECEIVE_DT,'YYYY-MM-DD') AS RECEIVE_DT
+		FROM TB_CONNECTIONITEM_MANAGEMENT A, TB_CN_ORDERITEM B
+		WHERE A.CN_ORDERNO = B.CN_ORDERNO
+		<if test="cnOrderNo!=null and cnOrderNo!='' ">
+		AND A.CN_ORDERNO = #{cnOrderNo}
+		</if>
+		ORDER BY A.CN_ORDERNO ASC
+	</select>
+	
+	<select id = "selectConnectiontItemInfo" resultMap = "com.office.connection.dao.connectionDao.connectionMap">
+		SELECT 
+    		A.CONNECTION_NAME,
+    		A.CEO_NAME,
+    		A.CONNECTION_NUMBER,
+    		A.CHARGE_NAME,
+    		A.CHARGE_NUMBER,
+    		A.CHARGE_EMAIL,
+    		A.CONNECTION_ST
+		FROM TB_CONNECTION_MANAGEMENT A
+		WHERE CONNECTION_CODE = #{connectionCode}
+	</select>
+	
+	
+	<insert id="insertConnectionItem">
+	INSERT INTO TB_CN_ORDERITEM(
+		CONNECTION_CODE, PRODUCT_CODE, CN_ORDERNO, CN_ORDERQTA, 
+		CN_ORDERPRICE, PRODUCT_NAME, CN_ORDERDT 
+	)VALUES(
+		#{connectionCode}, #{productCode}, #{cnOrderNo}, #{cnOrderQta}, 
+		#{cnOrderPrice}, #{productName}, sysdate
+	)
+	
+	</insert>
+	
+	<select id='selectMaxCnOrderNo' resultType="String">
+	SELECT REPLACE(#{connectionCode} || TO_CHAR(SUBSTRB(MAX(CN_ORDERNO),6,2) + 1,'00'),' ','')
+	FROM TB_CN_ORDERITEM
+	WHERE CONNECTION_CODE=#{connectionCode}
+	</select>
+	
+
+	
+	<insert id="insertConnectioninfo">
+	INSERT INTO TB_CONNECTIONITEM_MANAGEMENT
+	(CONNECTION_CODE, CONNECTION_NAME, CN_ORDERNO, CN_ORDERST, RECEIVE_DT
+	)
+	SELECT CONNECTION_CODE, CONNECTION_NAME, #{cnOrderNo}, '입고대기중', '2024-11-11'
+ 	FROM TB_CONNECTION_MANAGEMENT
+ 	WHERE CONNECTION_CODE = #{connectionCode}
+	</insert>
+	
+
+	
+</mapper>
